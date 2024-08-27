@@ -1,18 +1,20 @@
-﻿using NPOI.HSSF.UserModel;
-using NPOI.SS.Formula.Functions;
+﻿using Newtonsoft.Json.Linq;
+using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 
 namespace ImportExcel
 {
     public class ExcelImporter
     {
-        public DataTable ImportExcelToDataTable(string filePath)
+        public List<order> ImportExcelToDataTable(string filePath, List<import_column> importColumns)
         {
+            List<order> orders = new List<order>();
             DataTable dataTable = new DataTable();
             IWorkbook workbook;
 
@@ -59,7 +61,7 @@ namespace ImportExcel
                     IRow row = sheet.GetRow(i);
                     if (row == null) continue; // Bỏ qua hàng trống
 
-                    DataRow dataRow = dataTable.NewRow();
+                    order order = new order();
 
                     for (int j = 0; j < cellCount; j++)
                     {
@@ -73,15 +75,21 @@ namespace ImportExcel
                                 cell = formulaEvaluator.EvaluateInCell(cell);
                             }
 
-                            dataRow[j] = GetCellValue(cell);
+                            var x = importColumns.FirstOrDefault(ic => ic.column_name_excel == dataTable.Columns[j].ToString());
+
+                            var pr = order.GetType().GetProperty(x.column_id);
+                            if(pr != null)
+                            {
+                                pr.SetValue(order, GetCellValue(cell));
+                            }
                         }
                     }
 
-                    dataTable.Rows.Add(dataRow);
+                    orders.Add(order);
                 }
             }
 
-            return dataTable;
+            return orders;
         }
 
         private object GetCellValue(ICell cell)

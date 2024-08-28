@@ -176,3 +176,5 @@ C:\Users\vuvan\Desktop\Project\ImportExcel\ImportExcel\obj\Debug\ImportExcel.csp
 C:\Users\vuvan\Desktop\Project\ImportExcel\ImportExcel\obj\Debug\ImportEx.BCE73CC8.Up2Date
 C:\Users\vuvan\Desktop\Project\ImportExcel\ImportExcel\obj\Debug\ImportExcel.exe
 C:\Users\vuvan\Desktop\Project\ImportExcel\ImportExcel\obj\Debug\ImportExcel.pdb
+F:\Project\import-excel\ImportExcel\ImportExcel\bin\Debug\Microsoft.Extensions.DependencyInjection.dll
+F:\Project\import-excel\ImportExcel\ImportExcel\bin\Debug\Microsoft.Extensions.DependencyInjection.xml

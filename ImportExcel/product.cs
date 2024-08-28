@@ -1,13 +1,15 @@
 ﻿using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ImportExcel
 {
-    public class product
+    [Table("product")]
+    public class product : BaseModel, IBaseImportModel
     {
         public string sku { get; set; }
 

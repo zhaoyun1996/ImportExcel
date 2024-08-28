@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ImportExcel
 {
-    public class order
+    [Table("order")]
+    public class order : BaseModel, IBaseImportModel
     {
         public string reftype { get; set; }
 

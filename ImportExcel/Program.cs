@@ -1,17 +1,21 @@
-﻿using Dapper;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Npgsql;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Runtime.Remoting.Contexts;
+using System.Reflection;
 using System.Text;
 
 namespace ImportExcel
 {
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+
     public class Program
     {
         static void Main(string[] args)
@@ -20,6 +24,21 @@ namespace ImportExcel
             {
                 // Thiết lập mã hóa UTF-8 cho console
                 Console.OutputEncoding = Encoding.UTF8;
+
+                // Create a service collection and configure services
+                var serviceCollection = new ServiceCollection();
+                ConfigureServices(serviceCollection);
+
+                // Build the service provider
+                var serviceProvider = serviceCollection.BuildServiceProvider();
+
+                ImportUtil importUtil;
+
+                // Create a scope
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    importUtil = scope.ServiceProvider.GetRequiredService<ImportUtil>();
+                }
 
                 Console.WriteLine("Chương trình đang xử lý.");
 
@@ -30,87 +49,15 @@ namespace ImportExcel
 
                     Console.WriteLine("Kết nối dữ liệu thành công.");
 
-                    List<import_column> importColumns = null;
+                    IImportService importService = importUtil.GetImportService("product");
 
-                    // Tạo câu lệnh SQL Update từ class
-                    string sqlQuery = "select * from dbo.import_column;";
-                    importColumns = cnn.Query<import_column>(sqlQuery)?.ToList();
+                    List<import_column> importColumns = importService.GetImportColumns(cnn);
 
-                    Console.WriteLine("Lấy cấu hình cột.");
+                    List<BaseModel> data = importService.GetData(cnn, importColumns);
 
-                    ExcelImporter importer = new ExcelImporter();
-                    string filePath = @"C:\Users\vuvan\Desktop\AECoder.xlsx";
+                    importService.InsertData(cnn, data);
 
-                    List<product> data = importer.ImportExcelToDataTable<product>(filePath, importColumns);
-
-                    Console.WriteLine("Đọc xong dữ liệu từ file excel.");
-
-                    //product item = new product();
-                    //var getProperties = item.GetType().GetProperties();
-                    //List<string> pro = new List<string>();
-
-                    // Lấy các thuộc tính của đối tượng T
-                    var properties = typeof(product).GetProperties();
-
-                    // Xây dựng chuỗi các cột
-                    StringBuilder columnNames = new StringBuilder();
-                    for (int i = 0; i < properties.Length; i++)
-                    {
-                        columnNames.Append(properties[i].Name);
-
-                        if (i < properties.Length - 1)
-                        {
-                            columnNames.Append(", ");
-                        }
-                    }
-
-                    // Xây dựng chuỗi truy vấn SQL
-                    StringBuilder queryBuilder = new StringBuilder($"INSERT INTO dbo.product ({columnNames}) VALUES ");
-
-                    int maxCount = 500; //data.Count;
-
-                    for (int i = 0; i < maxCount; i++)
-                    {
-                        queryBuilder.Append("(");
-                        for (int j = 0; j < properties.Length; j++)
-                        {
-                            queryBuilder.Append($"@{properties[j].Name}{i}");
-
-                            if (j < properties.Length - 1)
-                            {
-                                queryBuilder.Append(", ");
-                            }
-                        }
-                        queryBuilder.Append(")");
-
-                        if (i < maxCount - 1)
-                        {
-                            queryBuilder.Append(", ");
-                        }
-                    }
-
-                    queryBuilder.Append(";");
-
-                    string query = queryBuilder.ToString();
-
-                    var count = 0;
-
-                    using (var command = new NpgsqlCommand(query, cnn))
-                    {
-                        // Thêm tham số vào lệnh
-                        for (int i = 0; i < data.Count; i++)
-                        {
-                            foreach (var property in properties)
-                            {
-                                var value = property.GetValue(data[i]);
-                                command.Parameters.AddWithValue($"@{property.Name}{i}", value ?? DBNull.Value);
-                            }
-                        }
-
-                        count = command.ExecuteNonQuery();
-                    }
-
-                    Console.WriteLine($"Nhập khẩu thành công {count} dòng.");
+                    //Console.WriteLine($"Nhập khẩu thành công {count} dòng.");
                     Console.WriteLine("Nhấn Enter để kết thúc...");
                     Console.ReadLine();
                 }
@@ -119,6 +66,14 @@ namespace ImportExcel
             {
                 Console.WriteLine("Đã xảy ra lỗi: " + ex.Message);
             }
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            // Register services
+            services.AddScoped<ImportUtil>();
+            services.AddScoped<product_import_service>();
+            services.AddScoped<order_import_service>();
         }
     }
 }

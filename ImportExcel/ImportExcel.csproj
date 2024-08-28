@@ -168,6 +168,7 @@
     <Compile Include="ExcelImporter.cs" />
     <Compile Include="import_column.cs" />
     <Compile Include="order.cs" />
+    <Compile Include="product.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

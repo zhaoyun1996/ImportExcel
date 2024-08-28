@@ -12,9 +12,9 @@ namespace ImportExcel
 {
     public class ExcelImporter
     {
-        public List<order> ImportExcelToDataTable(string filePath, List<import_column> importColumns)
+        public List<T> ImportExcelToDataTable<T>(string filePath, List<import_column> importColumns) where T : new ()
         {
-            List<order> orders = new List<order>();
+            List<T> data = new List<T>();
             DataTable dataTable = new DataTable();
             IWorkbook workbook;
 
@@ -61,7 +61,7 @@ namespace ImportExcel
                     IRow row = sheet.GetRow(i);
                     if (row == null) continue; // Bỏ qua hàng trống
 
-                    order order = new order();
+                    T item = new T();
 
                     for (int j = 0; j < cellCount; j++)
                     {
@@ -75,21 +75,21 @@ namespace ImportExcel
                                 cell = formulaEvaluator.EvaluateInCell(cell);
                             }
 
-                            var x = importColumns.FirstOrDefault(ic => ic.column_name_excel == dataTable.Columns[j].ToString());
+                            var x = importColumns.FirstOrDefault(ic => string.Equals(ic.column_name_excel, dataTable.Columns[j].ToString(), StringComparison.OrdinalIgnoreCase));
 
-                            var pr = order.GetType().GetProperty(x.column_id);
+                            var pr = item.GetType().GetProperty(x.column_id);
                             if(pr != null)
                             {
-                                pr.SetValue(order, GetCellValue(cell));
+                                pr.SetValue(item, GetCellValue(cell));
                             }
                         }
                     }
 
-                    orders.Add(order);
+                    data.Add(item);
                 }
             }
 
-            return orders;
+            return data;
         }
 
         private object GetCellValue(ICell cell)

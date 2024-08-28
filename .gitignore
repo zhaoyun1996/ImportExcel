@@ -1,0 +1,16 @@
+.vs
+*/bin/Debug
+*/obj/Debug
+*.exe
+*.pdb
+*.manifest
+*.cache
+packages
+/.vs/ImportExcel/v17/.suo
+/ImportExcel/bin/Debug/ImportExcel.exe
+/ImportExcel/bin/Debug/ImportExcel.pdb
+/ImportExcel/obj/Debug/ImportExcel.csproj.AssemblyReference.cache
+/ImportExcel/obj/Debug/ImportExcel.csproj.CoreCompileInputs.cache
+/ImportExcel/obj/Debug/ImportExcel.csproj.FileListAbsolute.txt
+/ImportExcel/obj/Debug/ImportExcel.exe
+/ImportExcel/obj/Debug/ImportExcel.pdb
